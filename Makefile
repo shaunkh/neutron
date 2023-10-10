@@ -85,6 +85,7 @@ include contrib/devtools/Makefile
 
 check_version:
 ifneq ($(GO_SYSTEM_VERSION), $(REQUIRE_GO_VERSION))
+	@echo "ERROR: Go system version: ${GO_SYSTEM_VERSION}"
 	@echo "ERROR: Go version ${REQUIRE_GO_VERSION} is required for $(VERSION) of Neutron."
 	exit 1
 endif
