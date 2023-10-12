@@ -9,6 +9,7 @@ import (
 	paramskeeper "github.com/cosmos/cosmos-sdk/x/params/keeper"
 	cronkeeper "github.com/neutron-org/neutron/x/cron/keeper"
 	feeburnerkeeper "github.com/neutron-org/neutron/x/feeburner/keeper"
+	fiattokenfactorykeeper "github.com/neutron-org/neutron/x/fiattokenfactory/keeper"
 	icqkeeper "github.com/neutron-org/neutron/x/interchainqueries/keeper"
 	tokenfactorykeeper "github.com/neutron-org/neutron/x/tokenfactory/keeper"
 
@@ -32,12 +33,13 @@ type Upgrade struct {
 
 type UpgradeKeepers struct {
 	// keepers
-	IcqKeeper          icqkeeper.Keeper
-	CronKeeper         cronkeeper.Keeper
-	TokenFactoryKeeper *tokenfactorykeeper.Keeper
-	FeeBurnerKeeper    *feeburnerkeeper.Keeper
-	SlashingKeeper     slashingkeeper.Keeper
-	ParamsKeeper       paramskeeper.Keeper
+	IcqKeeper              icqkeeper.Keeper
+	CronKeeper             cronkeeper.Keeper
+	TokenFactoryKeeper     *tokenfactorykeeper.Keeper
+	FiatTokenFactoryKeeper *fiattokenfactorykeeper.Keeper
+	FeeBurnerKeeper        *feeburnerkeeper.Keeper
+	SlashingKeeper         slashingkeeper.Keeper
+	ParamsKeeper           paramskeeper.Keeper
 	// subspaces
 	GlobalFeeSubspace paramtypes.Subspace
 }

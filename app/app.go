@@ -97,6 +97,10 @@ import (
 	cronkeeper "github.com/neutron-org/neutron/x/cron/keeper"
 	crontypes "github.com/neutron-org/neutron/x/cron/types"
 
+	fiattokenfactorymodule "github.com/neutron-org/neutron/x/fiattokenfactory"
+	fiattokenfactorymodulekeeper "github.com/neutron-org/neutron/x/fiattokenfactory/keeper"
+	fiattokenfactorymoduletypes "github.com/neutron-org/neutron/x/fiattokenfactory/types"
+
 	"github.com/neutron-org/neutron/x/tokenfactory"
 	tokenfactorykeeper "github.com/neutron-org/neutron/x/tokenfactory/keeper"
 	tokenfactorytypes "github.com/neutron-org/neutron/x/tokenfactory/types"
@@ -202,6 +206,7 @@ var (
 		vesting.AppModuleBasic{},
 		ccvconsumer.AppModuleBasic{},
 		wasm.AppModuleBasic{},
+		fiattokenfactorymodule.AppModuleBasic{},
 		tokenfactory.AppModuleBasic{},
 		interchainqueries.AppModuleBasic{},
 		interchaintxs.AppModuleBasic{},
@@ -239,6 +244,7 @@ var (
 		feeburnertypes.ModuleName:                     nil,
 		ccvconsumertypes.ConsumerRedistributeName:     {authtypes.Burner},
 		ccvconsumertypes.ConsumerToSendToProviderName: nil,
+		fiattokenfactorymoduletypes.ModuleName:        {authtypes.Minter, authtypes.Burner, authtypes.Staking},
 		tokenfactorytypes.ModuleName:                  {authtypes.Minter, authtypes.Burner},
 		crontypes.ModuleName:                          nil,
 	}
@@ -299,9 +305,11 @@ type App struct {
 	FeeKeeper           *feekeeper.Keeper
 	FeeBurnerKeeper     *feeburnerkeeper.Keeper
 	ConsumerKeeper      ccvconsumerkeeper.Keeper
-	TokenFactoryKeeper  *tokenfactorykeeper.Keeper
-	CronKeeper          cronkeeper.Keeper
-	RouterKeeper        *routerkeeper.Keeper
+
+	FiatTokenFactoryKeeper *fiattokenfactorymodulekeeper.Keeper
+	TokenFactoryKeeper     *tokenfactorykeeper.Keeper
+	CronKeeper             cronkeeper.Keeper
+	RouterKeeper           *routerkeeper.Keeper
 
 	RouterModule router.AppModule
 
@@ -309,6 +317,7 @@ type App struct {
 	HooksICS4Wrapper       ibchooks.ICS4Middleware
 
 	// make scoped keepers public for test purposes
+
 	ScopedIBCKeeper         capabilitykeeper.ScopedKeeper
 	ScopedTransferKeeper    capabilitykeeper.ScopedKeeper
 	ScopedWasmKeeper        capabilitykeeper.ScopedKeeper
@@ -358,7 +367,7 @@ func New(
 		evidencetypes.StoreKey, ibctransfertypes.StoreKey, icacontrollertypes.StoreKey,
 		icahosttypes.StoreKey, capabilitytypes.StoreKey,
 		interchainqueriesmoduletypes.StoreKey, contractmanagermoduletypes.StoreKey, interchaintxstypes.StoreKey, wasm.StoreKey, feetypes.StoreKey,
-		feeburnertypes.StoreKey, adminmodulemoduletypes.StoreKey, ccvconsumertypes.StoreKey, tokenfactorytypes.StoreKey, routertypes.StoreKey,
+		feeburnertypes.StoreKey, adminmodulemoduletypes.StoreKey, ccvconsumertypes.StoreKey, tokenfactorytypes.StoreKey, fiattokenfactorymoduletypes.StoreKey, routertypes.StoreKey,
 		crontypes.StoreKey, ibchookstypes.StoreKey,
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
@@ -526,7 +535,18 @@ func New(
 		app.AccountKeeper,
 		app.BankKeeper.WithMintCoinsRestriction(tokenfactorytypes.NewTokenFactoryDenomMintCoinsRestriction()),
 	)
+
 	app.TokenFactoryKeeper = &tokenFactoryKeeper
+
+	app.FiatTokenFactoryKeeper = fiattokenfactorymodulekeeper.NewKeeper(
+		appCodec,
+		keys[fiattokenfactorymoduletypes.StoreKey],
+		app.GetSubspace(fiattokenfactorymoduletypes.ModuleName),
+
+		app.BankKeeper,
+	)
+
+	fiattokenfactorymodule := fiattokenfactorymodule.NewAppModule(appCodec, app.FiatTokenFactoryKeeper, app.AccountKeeper, app.BankKeeper)
 
 	wasmDir := filepath.Join(homePath, "wasm")
 	wasmConfig, err := wasm.ReadWasmConfig(appOpts)
@@ -615,8 +635,10 @@ func New(
 		app.AdminmoduleKeeper.Router().AddRoute(wasm.RouterKey, wasm.NewWasmProposalHandler(app.WasmKeeper, enabledProposals))
 	}
 	transferIBCModule := transferSudo.NewIBCModule(app.TransferKeeper)
+
 	// receive call order: wasmHooks#OnRecvPacketOverride(transferIbcModule#OnRecvPacket())
 	ibcHooksMiddleware := ibchooks.NewIBCMiddleware(&transferIBCModule, &app.HooksICS4Wrapper)
+
 	app.HooksTransferIBCModule = &ibcHooksMiddleware
 
 	// Create static IBC router, add transfer route, then set and seal it
@@ -691,6 +713,7 @@ func New(
 		adminModule,
 		ibcHooksModule,
 		tokenfactory.NewAppModule(appCodec, *app.TokenFactoryKeeper, app.AccountKeeper, app.BankKeeper),
+		fiattokenfactorymodule,
 		cronModule,
 		globalfee.NewAppModule(app.GetSubspace(globalfee.ModuleName)),
 	)
@@ -715,6 +738,7 @@ func New(
 		paramstypes.ModuleName,
 		ccvconsumertypes.ModuleName,
 		tokenfactorytypes.ModuleName,
+		fiattokenfactorymoduletypes.ModuleName,
 		icatypes.ModuleName,
 		interchainqueriesmoduletypes.ModuleName,
 		interchaintxstypes.ModuleName,
@@ -745,6 +769,7 @@ func New(
 		ibctransfertypes.ModuleName,
 		ccvconsumertypes.ModuleName,
 		tokenfactorytypes.ModuleName,
+		fiattokenfactorymoduletypes.ModuleName,
 		icatypes.ModuleName,
 		interchainqueriesmoduletypes.ModuleName,
 		interchaintxstypes.ModuleName,
@@ -780,6 +805,8 @@ func New(
 		feegrant.ModuleName,
 		ccvconsumertypes.ModuleName,
 		tokenfactorytypes.ModuleName,
+		fiattokenfactorymoduletypes.ModuleName,
+
 		icatypes.ModuleName,
 		interchainqueriesmoduletypes.ModuleName,
 		interchaintxstypes.ModuleName,
@@ -817,6 +844,7 @@ func New(
 		interchainQueriesModule,
 		interchainTxsModule,
 		cronModule,
+		fiattokenfactorymodule,
 	)
 	app.sm.RegisterStoreDecoders()
 
@@ -843,6 +871,8 @@ func New(
 				SignModeHandler: encodingConfig.TxConfig.SignModeHandler(),
 				SigGasConsumer:  ante.DefaultSigVerificationGasConsumer,
 			},
+			fiatTokenFactoryKeeper: app.FiatTokenFactoryKeeper,
+
 			IBCKeeper:            app.IBCKeeper,
 			WasmConfig:           &wasmConfig,
 			TXCounterStoreKey:    keys[wasm.StoreKey],
@@ -926,13 +956,14 @@ func (app *App) setupUpgradeHandlers() {
 				app.mm,
 				app.configurator,
 				&upgrades.UpgradeKeepers{
-					FeeBurnerKeeper:    app.FeeBurnerKeeper,
-					CronKeeper:         app.CronKeeper,
-					IcqKeeper:          app.InterchainQueriesKeeper,
-					TokenFactoryKeeper: app.TokenFactoryKeeper,
-					SlashingKeeper:     app.SlashingKeeper,
-					ParamsKeeper:       app.ParamsKeeper,
-					GlobalFeeSubspace:  app.GetSubspace(globalfee.ModuleName),
+					FeeBurnerKeeper:        app.FeeBurnerKeeper,
+					CronKeeper:             app.CronKeeper,
+					IcqKeeper:              app.InterchainQueriesKeeper,
+					TokenFactoryKeeper:     app.TokenFactoryKeeper,
+					FiatTokenFactoryKeeper: app.FiatTokenFactoryKeeper,
+					SlashingKeeper:         app.SlashingKeeper,
+					ParamsKeeper:           app.ParamsKeeper,
+					GlobalFeeSubspace:      app.GetSubspace(globalfee.ModuleName),
 				},
 			),
 		)
@@ -1101,6 +1132,7 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 
 	paramsKeeper.Subspace(ccvconsumertypes.ModuleName)
 	paramsKeeper.Subspace(tokenfactorytypes.ModuleName)
+	paramsKeeper.Subspace(fiattokenfactorymoduletypes.ModuleName)
 
 	paramsKeeper.Subspace(interchainqueriesmoduletypes.ModuleName)
 	paramsKeeper.Subspace(interchaintxstypes.ModuleName)

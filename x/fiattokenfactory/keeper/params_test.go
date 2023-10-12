@@ -3,8 +3,8 @@ package keeper_test
 import (
 	"testing"
 
-	testkeeper "github.com/strangelove-ventures/noble/testutil/keeper"
-	"github.com/strangelove-ventures/noble/x/fiattokenfactory/types"
+	testkeeper "github.com/neutron-org/neutron/testutil/keeper"
+	"github.com/neutron-org/neutron/x/fiattokenfactory/types"
 	"github.com/stretchr/testify/require"
 )
 

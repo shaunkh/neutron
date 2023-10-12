@@ -16,7 +16,7 @@ DOCKER := $(shell which docker)
 BUILDDIR ?= $(CURDIR)/build
 HTTPS_GIT := https://github.com/neutron-org/neutron.git
 
-GO_SYSTEM_VERSION = $(shell go version | cut -c 14- | cut -d' ' -f1 | cut -d'.' -f1-2)
+GO_SYSTEM_VERSION = $(shell go1.20 version | cut -c 14- | cut -d' ' -f1 | cut -d'.' -f1-2)
 REQUIRE_GO_VERSION = 1.20
 
 export GO111MODULE = on

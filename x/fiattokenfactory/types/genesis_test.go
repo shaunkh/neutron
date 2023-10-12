@@ -4,8 +4,8 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/strangelove-ventures/noble/testutil/sample"
-	"github.com/strangelove-ventures/noble/x/fiattokenfactory/types"
+	"github.com/neutron-org/neutron/testutil/sample"
+	"github.com/neutron-org/neutron/x/fiattokenfactory/types"
 
 	"github.com/stretchr/testify/require"
 )

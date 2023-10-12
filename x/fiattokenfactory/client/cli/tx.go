@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/neutron-org/neutron/x/fiattokenfactory/types"
 	"github.com/spf13/cobra"
-	"github.com/strangelove-ventures/noble/x/fiattokenfactory/types"
 )
 
 // GetTxCmd returns the transaction commands for this module

@@ -5,8 +5,8 @@ import (
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/neutron-org/neutron/x/fiattokenfactory/types"
 	"github.com/spf13/cobra"
-	"github.com/strangelove-ventures/noble/x/fiattokenfactory/types"
 )
 
 func CmdShowPauser() *cobra.Command {

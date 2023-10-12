@@ -8,9 +8,9 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	keepertest "github.com/strangelove-ventures/noble/testutil/keeper"
-	"github.com/strangelove-ventures/noble/testutil/nullify"
-	"github.com/strangelove-ventures/noble/x/fiattokenfactory/types"
+	keepertest "github.com/neutron-org/neutron/testutil/keeper"
+	"github.com/neutron-org/neutron/testutil/nullify"
+	"github.com/neutron-org/neutron/x/fiattokenfactory/types"
 )
 
 func TestPauserQuery(t *testing.T) {

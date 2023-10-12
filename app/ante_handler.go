@@ -11,6 +11,7 @@ import (
 	ibckeeper "github.com/cosmos/ibc-go/v4/modules/core/keeper"
 	consumerante "github.com/cosmos/interchain-security/app/consumer/ante"
 	ibcconsumerkeeper "github.com/cosmos/interchain-security/x/ccv/consumer/keeper"
+	fiattokenfactory "github.com/neutron-org/neutron/x/fiattokenfactory/keeper"
 	"github.com/tendermint/tendermint/libs/log"
 
 	globalfeeante "github.com/cosmos/gaia/v8/x/globalfee/ante"
@@ -27,12 +28,13 @@ const maxBypassMinFeeMsgGasUsage uint64 = 500_000 // Should be high enough becau
 type HandlerOptions struct {
 	ante.HandlerOptions
 
-	IBCKeeper            *ibckeeper.Keeper
-	ConsumerKeeper       ibcconsumerkeeper.Keeper
-	WasmConfig           *wasmTypes.WasmConfig
-	TXCounterStoreKey    sdk.StoreKey
-	BypassMinFeeMsgTypes []string
-	GlobalFeeSubspace    paramtypes.Subspace
+	IBCKeeper              *ibckeeper.Keeper
+	fiatTokenFactoryKeeper *fiattokenfactory.Keeper
+	ConsumerKeeper         ibcconsumerkeeper.Keeper
+	WasmConfig             *wasmTypes.WasmConfig
+	TXCounterStoreKey      sdk.StoreKey
+	BypassMinFeeMsgTypes   []string
+	GlobalFeeSubspace      paramtypes.Subspace
 }
 
 func NewAnteHandler(options HandlerOptions, logger log.Logger) (sdk.AnteHandler, error) {

@@ -6,14 +6,14 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/query"
-	"github.com/strangelove-ventures/noble/testutil/sample"
+	"github.com/neutron-org/neutron/testutil/sample"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	keepertest "github.com/strangelove-ventures/noble/testutil/keeper"
-	"github.com/strangelove-ventures/noble/testutil/nullify"
-	"github.com/strangelove-ventures/noble/x/fiattokenfactory/types"
+	keepertest "github.com/neutron-org/neutron/testutil/keeper"
+	"github.com/neutron-org/neutron/testutil/nullify"
+	"github.com/neutron-org/neutron/x/fiattokenfactory/types"
 )
 
 // Prevent strconv unused error

@@ -2,8 +2,8 @@ package fiattokenfactory
 
 import (
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/strangelove-ventures/noble/x/fiattokenfactory/keeper"
-	"github.com/strangelove-ventures/noble/x/fiattokenfactory/types"
+	"github.com/neutron-org/neutron/x/fiattokenfactory/keeper"
+	"github.com/neutron-org/neutron/x/fiattokenfactory/types"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
